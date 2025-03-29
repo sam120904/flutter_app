@@ -18,7 +18,19 @@ class HomePage extends StatelessWidget {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await authService.signOut();
-              // Navigation is handled by the StreamBuilder in main.dart
+              // Show logout success message
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Logged out successfully'),
+                  backgroundColor: Colors.blue,
+                  duration: Duration(seconds: 2),
+                ),
+              );
+              
+              // Explicitly navigate to login page
+              Future.delayed(const Duration(milliseconds: 500), () {
+                Navigator.pushReplacementNamed(context, '/login');
+              });
             },
           ),
         ],
@@ -26,41 +38,72 @@ class HomePage extends StatelessWidget {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.check_circle_outline,
-                color: Colors.green,
-                size: 80,
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Welcome, ${user?.email ?? 'User'}!',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.black, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.3),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3),
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'You have successfully logged in.',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+              ],
+            ),
+            padding: const EdgeInsets.all(24.0),
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.check_circle_outline,
+                  color: Colors.green,
+                  size: 80,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: () async {
-                  await authService.signOut();
-                  // Navigation is handled by the StreamBuilder in main.dart
-                },
-                child: const Text('Sign Out'),
-              ),
-            ],
+                const SizedBox(height: 24),
+                Text(
+                  'Welcome, ${user?.email ?? 'User'}!',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'You have successfully logged in.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Sign Out'),
+                  onPressed: () async {
+                    await authService.signOut();
+                    // Show logout success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Logged out successfully'),
+                        backgroundColor: Colors.blue,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    
+                    // Explicitly navigate to login page
+                    Future.delayed(const Duration(milliseconds: 500), () {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    });
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

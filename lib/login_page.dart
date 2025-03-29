@@ -37,7 +37,22 @@ class _LoginPageState extends State<LoginPage> {
           _emailController.text.trim(),
           _passwordController.text,
         );
-        // Navigation is handled by the StreamBuilder in main.dart
+        
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login successful!'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          
+          // Explicitly navigate to home page
+          Future.delayed(const Duration(seconds: 1), () {
+            Navigator.pushReplacementNamed(context, '/home');
+          });
+        }
       } on FirebaseAuthException catch (e) {
         setState(() {
           _errorMessage = _getErrorMessage(e.code);
@@ -78,7 +93,21 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: ConstrainedBox(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.black, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(24.0),
               constraints: const BoxConstraints(maxWidth: 400),
               child: Form(
                 key: _formKey,

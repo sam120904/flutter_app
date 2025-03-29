@@ -20,6 +20,7 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   String? _errorMessage;
+  bool _signupSuccess = false;
 
   @override
   void dispose() {
@@ -35,6 +36,7 @@ class _SignupPageState extends State<SignupPage> {
       setState(() {
         _isLoading = true;
         _errorMessage = null;
+        _signupSuccess = false;
       });
 
       try {
@@ -42,7 +44,26 @@ class _SignupPageState extends State<SignupPage> {
           _emailController.text.trim(),
           _passwordController.text,
         );
-        // Navigation is handled by the StreamBuilder in main.dart
+        
+        // Show success message and set signup success flag
+        if (mounted) {
+          setState(() {
+            _signupSuccess = true;
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Signup successful! Redirecting to login...'),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 2),
+            ),
+          );
+          
+          // Redirect to login page after a short delay
+          Future.delayed(const Duration(seconds: 2), () {
+            Navigator.pushReplacementNamed(context, '/login');
+          });
+        }
       } on FirebaseAuthException catch (e) {
         setState(() {
           _errorMessage = _getErrorMessage(e.code);
@@ -81,7 +102,21 @@ class _SignupPageState extends State<SignupPage> {
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
-            child: ConstrainedBox(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.black, width: 2),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(24.0),
               constraints: const BoxConstraints(maxWidth: 400),
               child: Form(
                 key: _formKey,
@@ -121,6 +156,28 @@ class _SignupPageState extends State<SignupPage> {
                         ),
                       ),
                     if (_errorMessage != null) const SizedBox(height: 16),
+                    if (_signupSuccess)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.green[50],
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.green),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.check_circle, color: Colors.green[700]),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Account created successfully! Redirecting to login...',
+                                style: TextStyle(color: Colors.green[700]),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    if (_signupSuccess) const SizedBox(height: 16),
                     TextFormField(
                       controller: _nameController,
                       decoration: const InputDecoration(
@@ -215,7 +272,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: _isLoading ? null : _signup,
+                      onPressed: _isLoading || _signupSuccess ? null : _signup,
                       child: _isLoading
                           ? const SizedBox(
                               height: 20,
