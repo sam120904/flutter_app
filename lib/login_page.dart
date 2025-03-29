@@ -77,9 +77,9 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
             ),
           );
           
-          // Explicitly navigate to home page
+          // Navigate to dashboard instead of home page
           Future.delayed(const Duration(seconds: 1), () {
-            Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushReplacementNamed(context, '/dashboard');
           });
         }
       } on FirebaseAuthException catch (e) {

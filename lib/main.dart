@@ -5,6 +5,7 @@ import 'firebase_options.dart'; // Import the generated config
 import 'login_page.dart';
 import 'signup_page.dart';
 import 'home_page.dart';
+import 'dashboard.dart'; // Import the dashboard page
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasData) {
-            return const HomePage();
+            return const DashboardPage();
           }
           return const LoginPage();
         },
@@ -70,7 +71,9 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
         '/home': (context) => const HomePage(),
+        '/dashboard': (context) => const DashboardPage(),
       },
     );
   }
 }
+
