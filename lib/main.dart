@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart'; // Import the generated config
 import 'login_page.dart';
 import 'signup_page.dart';
-import 'home_page.dart';
 import 'dashboard.dart'; // Import the dashboard page
 
 void main() async {
@@ -70,7 +69,6 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignupPage(),
-        '/home': (context) => const HomePage(),
         '/dashboard': (context) => const DashboardPage(),
       },
     );
