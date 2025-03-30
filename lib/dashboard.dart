@@ -84,56 +84,15 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   }
   
   void _toggleClearance() {
-  // Don't allow clearance to be given if weight is out of range
-  if (_isOverweight || _isUnderweight) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 12),
-            const Text('Cannot give clearance when weight is out of range'),
-          ],
-        ),
-        backgroundColor: Colors.red.shade600,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    return;
-  }
-  
-  setState(() {
-    _isClearanceGiven = !_isClearanceGiven;
-    if (_isClearanceGiven) {
+    // Don't allow clearance to be given if weight is out of range
+    if (_isOverweight || _isUnderweight) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
-              const Icon(Icons.check_circle, color: Colors.white),
+              const Icon(Icons.error_outline, color: Colors.white),
               const SizedBox(width: 12),
-              const Text('Clearance given to train'),
-            ],
-          ),
-          backgroundColor: Colors.green.shade600,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.cancel, color: Colors.white),
-              const SizedBox(width: 12),
-              const Text('Clearance revoked from train'),
+              const Text('Cannot give clearance when weight is out of range'),
             ],
           ),
           backgroundColor: Colors.red.shade600,
@@ -144,9 +103,50 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           duration: const Duration(seconds: 2),
         ),
       );
+      return;
     }
-  });
-}
+    
+    setState(() {
+      _isClearanceGiven = !_isClearanceGiven;
+      if (_isClearanceGiven) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                const Text('Clearance given to train'),
+              ],
+            ),
+            backgroundColor: Colors.green.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.cancel, color: Colors.white),
+                const SizedBox(width: 12),
+                const Text('Clearance revoked from train'),
+              ],
+            ),
+            backgroundColor: Colors.red.shade600,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    });
+  }
   
   void _dismissAlert() {
     setState(() {
@@ -232,35 +232,35 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     final screenSize = MediaQuery.of(context).size;
     
     return Scaffold(
-      body: Column(
-        children: [
-          // App Bar - Now only the navbar is fixed at the top
-          _buildAppBar(user),
-          
-          // Main Content - Separate from the navbar
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.blue.shade50,
-                    Colors.teal.shade50,
-                  ],
+      // Use a Column for the main layout with the navbar fixed at the top
+      body: SafeArea(
+        child: Column(
+          children: [
+            // App Bar - Fixed at the top
+            _buildAppBar(user),
+            
+            // Main Content - Scrollable
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.blue.shade50,
+                      Colors.teal.shade50,
+                    ],
+                  ),
                 ),
-              ),
-              child: SafeArea(
-                top: false, // Don't add safe area padding at the top since we have the navbar
-                child: FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Column(
-                    children: [
-                      // Train Selector and Alert Banner
-                      Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: Padding(
+                // Use ListView instead of Column to make content scrollable
+                child: ListView(
+                  children: [
+                    FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: Column(
+                        children: [
+                          // Train Selector and Alert Banner
+                          Padding(
                             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                             child: Column(
                               children: [
@@ -273,34 +273,27 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                               ],
                             ),
                           ),
-                        ),
-                      ),
-                      
-                      // Tab Bar
-                      Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1200),
-                          child: Padding(
+                          
+                          // Tab Bar
+                          Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: _buildTabBar(),
                           ),
-                        ),
+                          
+                          // Tab Content - Set a fixed height for map to avoid overflow
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: _buildTabContent(screenSize),
+                          ),
+                        ],
                       ),
-                      
-                      // Tab Content
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: _buildTabContent(screenSize),
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -318,97 +311,89 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           ),
         ],
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.shield,
-                        color: Colors.blue.shade700,
-                        size: 24, // Increased from 20
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Vector Shield',
-                          style: TextStyle(
-                            fontSize: 22, // Increased from 18
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade800,
-                          ),
-                        ),
-                        Text(
-                          'Train Monitoring Dashboard',
-                          style: TextStyle(
-                            fontSize: 14, // Increased from 12
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  shape: BoxShape.circle,
                 ),
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 18, // Increased from 16
-                      backgroundColor: Colors.blue.shade100,
-                      child: Text(
-                        user?.email?.isNotEmpty == true ? user!.email![0].toUpperCase() : 'U',
-                        style: TextStyle(
-                          fontSize: 16, // Increased from 14
-                          color: Colors.blue.shade800,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _isLoggingOut
-                      ? SizedBox(
-                          width: 28, // Increased from 24
-                          height: 28, // Increased from 24
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.blue.shade700,
-                          ),
-                        )
-                      : IconButton(
-                          icon: Icon(
-                            Icons.logout_rounded,
-                            color: Colors.blue.shade700,
-                            size: 28, // Increased from 24
-                          ),
-                          onPressed: _signOut,
-                          tooltip: 'Logout',
-                        ),
-                  ],
+                child: Icon(
+                  Icons.shield,
+                  color: Colors.blue.shade700,
+                  size: 24,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Vector Shield',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade800,
+                    ),
+                  ),
+                  Text(
+                    'Train Monitoring Dashboard',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: Colors.blue.shade100,
+                child: Text(
+                  user?.email?.isNotEmpty == true ? user!.email![0].toUpperCase() : 'U',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.blue.shade800,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              _isLoggingOut
+                ? SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.blue.shade700,
+                    ),
+                  )
+                : IconButton(
+                    icon: Icon(
+                      Icons.logout_rounded,
+                      color: Colors.blue.shade700,
+                      size: 24,
+                    ),
+                    onPressed: _signOut,
+                    tooltip: 'Logout',
+                  ),
+            ],
+          ),
+        ],
       ),
     );
   }
   
   Widget _buildTrainSelector() {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -425,7 +410,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           Icon(
             Icons.train,
             color: Colors.blue.shade700,
-            size: 24, // Increased from 20
+            size: 20,
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -435,7 +420,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 Text(
                   'Selected Train',
                   style: TextStyle(
-                    fontSize: 16, // Increased from 14
+                    fontSize: 14,
                     color: Colors.grey.shade600,
                   ),
                 ),
@@ -443,9 +428,9 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                   value: _selectedTrain,
                   isExpanded: true,
                   underline: Container(),
-                  icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700, size: 26), // Increased from 22
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700),
                   style: TextStyle(
-                    fontSize: 18, // Increased from 16
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.blue.shade800,
                   ),
@@ -467,7 +452,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6), // Increased from 10, 5
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: _isOverweight 
                 ? Colors.red.shade100 
@@ -485,14 +470,14 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                     : _isUnderweight 
                       ? Icons.warning 
                       : Icons.check_circle,
-                  size: 16, // Increased from 14
+                  size: 14,
                   color: _isOverweight 
                     ? Colors.red.shade700 
                     : _isUnderweight 
                       ? Colors.amber.shade700 
                       : Colors.green.shade700,
                 ),
-                const SizedBox(width: 6), // Increased from 4
+                const SizedBox(width: 4),
                 Text(
                   _isOverweight 
                     ? 'Overload' 
@@ -500,7 +485,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                       ? 'Underload' 
                       : 'Normal',
                   style: TextStyle(
-                    fontSize: 14, // Increased from 12
+                    fontSize: 12,
                     fontWeight: FontWeight.bold,
                     color: _isOverweight 
                       ? Colors.red.shade700 
@@ -519,7 +504,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   
   Widget _buildAlertBanner() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Increased from 12, 10
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: Colors.red.shade50,
         borderRadius: BorderRadius.circular(12),
@@ -530,9 +515,9 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           Icon(
             Icons.warning_amber_rounded,
             color: Colors.red.shade700,
-            size: 24, // Increased from 20
+            size: 20,
           ),
-          const SizedBox(width: 10), // Increased from 8
+          const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -540,7 +525,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 Text(
                   'ALERT',
                   style: TextStyle(
-                    fontSize: 16, // Increased from 14
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: Colors.red.shade700,
                   ),
@@ -548,7 +533,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 Text(
                   _alertMessage,
                   style: TextStyle(
-                    fontSize: 15, // Increased from 13
+                    fontSize: 13,
                     color: Colors.red.shade700,
                   ),
                 ),
@@ -559,7 +544,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             icon: Icon(
               Icons.close,
               color: Colors.red.shade700,
-              size: 18, // Increased from 16
+              size: 16,
             ),
             constraints: const BoxConstraints(),
             padding: const EdgeInsets.all(4),
@@ -597,7 +582,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           });
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12), // Increased from 10
+          padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isSelected ? Colors.white : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
@@ -614,14 +599,14 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             children: [
               Icon(
                 icon,
-                size: 24, // Increased from 20
+                size: 20,
                 color: isSelected ? Colors.blue.shade700 : Colors.grey.shade600,
               ),
-              const SizedBox(height: 6), // Increased from 4
+              const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 16, // Increased from 14
+                  fontSize: 14,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected ? Colors.blue.shade700 : Colors.grey.shade600,
                 ),
@@ -648,194 +633,176 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   
   Widget _buildOverviewTab(Size screenSize) {
     // Calculate responsive grid columns based on screen width
-    int crossAxisCount = screenSize.width < 600 ? 2 : 4;
+    int crossAxisCount = screenSize.width < 600 ? 1 : 2;
     
-    return SingleChildScrollView(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Column(
-            children: [
-              // Status Cards - Now 4 cards in one row on wide screens, 2 on mobile
-              GridView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.2,
-                ),
-                children: [
-                  _buildCompactWeightCard(),
-                  _buildCompactClearanceCard(),
-                  _buildCompactActionsCard(),
-                  _buildCompactNotificationsCard(), // Added a fourth card
-                ],
-              ),
-              
-              const SizedBox(height: 16),
-              
-              // Weight Limits Card
-              _buildCompactWeightLimitsCard(),
-              
-              const SizedBox(height: 16),
-              
-              // Quick Actions
-              _buildQuickActionsRow(),
-            ],
+    return Column(
+      children: [
+        // Status Cards - Now 2 cards in one row on wide screens, 1 on mobile
+        GridView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.2,
           ),
+          children: [
+            _buildCompactWeightCard(),
+            _buildCompactClearanceCard(),
+            _buildCompactActionsCard(),
+            _buildCompactNotificationsCard(),
+          ],
         ),
-      ),
+        
+        const SizedBox(height: 16),
+        
+        // Weight Limits Card
+        _buildCompactWeightLimitsCard(),
+        
+        const SizedBox(height: 16),
+        
+        // Quick Actions
+        _buildQuickActionsRow(),
+      ],
     );
   }
   
   Widget _buildAnalyticsTab(Size screenSize) {
     // Calculate responsive grid columns based on screen width
-    int crossAxisCount = screenSize.width < 600 ? 2 : 4;
+    int crossAxisCount = screenSize.width < 600 ? 1 : 2;
     
-    return SingleChildScrollView(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1200),
+    return Column(
+      children: [
+        // Weight History Graph
+        _buildWeightHistoryCard(),
+        
+        const SizedBox(height: 16),
+        
+        // Analytics Cards - Now 2 cards in one row on wide screens, 1 on mobile
+        GridView(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 1.5,
+          ),
+          children: [
+            _buildAnalyticsCard(
+              'Avg. Weight',
+              '38.2 tons',
+              Icons.scale,
+              Colors.purple,
+              '+2.3 from last week',
+            ),
+            _buildAnalyticsCard(
+              'Alerts',
+              '3',
+              Icons.warning_amber,
+              Colors.orange,
+              '2 resolved, 1 pending',
+            ),
+            _buildAnalyticsCard(
+              'Efficiency',
+              '92%',
+              Icons.speed,
+              Colors.green,
+              '+5% from last month',
+            ),
+            _buildAnalyticsCard(
+              'Distance',
+              '1,245 km',
+              Icons.route,
+              Colors.blue,
+              'This month',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  
+  Widget _buildLocationTab(Size screenSize) {
+    return Column(
+      children: [
+        // GPS Location Map - Fixed height to prevent overflow
+        SizedBox(
+          height: 300, // Fixed height for map
+          child: _buildLocationCard(),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        // Location Details
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Column(
             children: [
-              // Weight History Graph - Now with max width and centered horizontally
-              _buildWeightHistoryCard(),
-              
-              const SizedBox(height: 16),
-              
-              // Analytics Cards - Now 4 cards in one row on wide screens, 2 on mobile
-              GridView(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 1.5,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildAnalyticsCard(
-                    'Avg. Weight',
-                    '38.2 tons',
-                    Icons.scale,
-                    Colors.purple,
-                    '+2.3 from last week',
+                  _buildLocationDetail(Icons.speed, 'Speed', '45 km/h'),
+                  _buildLocationDetail(Icons.navigation, 'Direction', 'North'),
+                  _buildLocationDetail(Icons.timer, 'ETA', '2h 15m'),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: Colors.blue.shade700,
                   ),
-                  _buildAnalyticsCard(
-                    'Alerts',
-                    '3',
-                    Icons.warning_amber,
-                    Colors.orange,
-                    '2 resolved, 1 pending',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Current: Delhi Central Station',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
                   ),
-                  _buildAnalyticsCard(
-                    'Efficiency',
-                    '92%',
-                    Icons.speed,
-                    Colors.green,
-                    '+5% from last month',
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(
+                    Icons.flag,
+                    size: 16,
+                    color: Colors.green.shade700,
                   ),
-                  _buildAnalyticsCard(
-                    'Distance',
-                    '1,245 km',
-                    Icons.route,
-                    Colors.blue,
-                    'This month',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Destination: Mumbai Central',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-  
-  Widget _buildLocationTab(Size screenSize) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1200),
-        child: Column(
-          children: [
-            // GPS Location Map
-            Expanded(
-              child: _buildLocationCard(),
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Location Details
-            Container(
-              padding: const EdgeInsets.all(16), // Increased from 12
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildLocationDetail(Icons.speed, 'Speed', '45 km/h'),
-                      _buildLocationDetail(Icons.navigation, 'Direction', 'North'),
-                      _buildLocationDetail(Icons.timer, 'ETA', '2h 15m'),
-                    ],
-                  ),
-                  const SizedBox(height: 16), // Increased from 12
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on,
-                        size: 20, // Increased from 16
-                        color: Colors.blue.shade700,
-                      ),
-                      const SizedBox(width: 10), // Increased from 8
-                      Expanded(
-                        child: Text(
-                          'Current: Delhi Central Station',
-                          style: TextStyle(
-                            fontSize: 14, // Increased from 12
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6), // Increased from 4
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.flag,
-                        size: 20, // Increased from 16
-                        color: Colors.green.shade700,
-                      ),
-                      const SizedBox(width: 10), // Increased from 8
-                      Expanded(
-                        child: Text(
-                          'Destination: Mumbai Central',
-                          style: TextStyle(
-                            fontSize: 14, // Increased from 12
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
   
@@ -844,21 +811,21 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
       children: [
         Icon(
           icon,
-          size: 22, // Increased from 18
+          size: 18,
           color: Colors.blue.shade700,
         ),
-        const SizedBox(height: 6), // Increased from 4
+        const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
-            fontSize: 14, // Increased from 12
+            fontSize: 12,
             color: Colors.grey.shade600,
           ),
         ),
         Text(
           value,
           style: TextStyle(
-            fontSize: 16, // Increased from 14
+            fontSize: 14,
             fontWeight: FontWeight.bold,
             color: Colors.grey.shade800,
           ),
@@ -869,7 +836,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   
   Widget _buildCompactWeightCard() {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -889,13 +856,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Icon(
                 Icons.scale,
                 color: Colors.blue.shade700,
-                size: 20, // Increased from 16
+                size: 16,
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Current Weight',
                 style: TextStyle(
-                  fontSize: 16, // Increased from 14
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade700,
                 ),
@@ -909,7 +876,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 Text(
                   '${_currentWeight.toStringAsFixed(1)}',
                   style: TextStyle(
-                    fontSize: 32, // Increased from 28
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: _isOverweight 
                       ? Colors.red.shade700 
@@ -921,7 +888,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 Text(
                   'tons',
                   style: TextStyle(
-                    fontSize: 16, // Increased from 14
+                    fontSize: 14,
                     color: Colors.grey.shade600,
                   ),
                 ),
@@ -940,7 +907,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                   : Colors.green.shade500,
             ),
             borderRadius: BorderRadius.circular(10),
-            minHeight: 6, // Increased from 4
+            minHeight: 4,
           ),
         ],
       ),
@@ -949,7 +916,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   
   Widget _buildCompactClearanceCard() {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -969,13 +936,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Icon(
                 Icons.verified,
                 color: Colors.blue.shade700,
-                size: 20, // Increased from 16
+                size: 16,
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Clearance',
                 style: TextStyle(
-                  fontSize: 16, // Increased from 14
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade700,
                 ),
@@ -985,8 +952,8 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           const Spacer(),
           Center(
             child: Container(
-              width: 60, // Increased from 50
-              height: 60, // Increased from 50
+              width: 50,
+              height: 50,
               decoration: BoxDecoration(
                 color: _isClearanceGiven ? Colors.green.shade100 : Colors.red.shade100,
                 shape: BoxShape.circle,
@@ -994,7 +961,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               child: Center(
                 child: Icon(
                   _isClearanceGiven ? Icons.check_circle : Icons.cancel,
-                  size: 36, // Increased from 30
+                  size: 30,
                   color: _isClearanceGiven ? Colors.green.shade700 : Colors.red.shade700,
                 ),
               ),
@@ -1016,7 +983,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                   : (_isOverweight || _isUnderweight) 
                     ? Colors.grey.shade500 
                     : Colors.green.shade700,
-                padding: const EdgeInsets.symmetric(vertical: 10), // Increased from 8
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1026,8 +993,8 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 (_isOverweight || _isUnderweight)
                   ? 'Not Available'
                   : (_isClearanceGiven ? 'Revoke' : 'Give'),
-                style: TextStyle(
-                  fontSize: 15, // Increased from 13
+                style: const TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1040,7 +1007,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   
   Widget _buildCompactActionsCard() {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -1060,13 +1027,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Icon(
                 Icons.flash_on,
                 color: Colors.blue.shade700,
-                size: 20, // Increased from 16
+                size: 16,
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Quick Actions',
                 style: TextStyle(
-                  fontSize: 16, // Increased from 14
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade700,
                 ),
@@ -1089,7 +1056,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               );
             },
           ),
-          const SizedBox(height: 10), // Increased from 8
+          const SizedBox(height: 8),
           _buildMiniActionButton(
             icon: Icons.report_problem,
             label: 'Report',
@@ -1124,7 +1091,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   // New card added for the fourth card in Overview tab
   Widget _buildCompactNotificationsCard() {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -1144,13 +1111,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Icon(
                 Icons.notifications,
                 color: Colors.blue.shade700,
-                size: 20, // Increased from 16
+                size: 16,
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Notifications',
                 style: TextStyle(
-                  fontSize: 16, // Increased from 14
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade700,
                 ),
@@ -1164,7 +1131,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 Text(
                   '3',
                   style: TextStyle(
-                    fontSize: 32, // Increased from 28
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Colors.amber.shade700,
                   ),
@@ -1172,7 +1139,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                 Text(
                   'pending',
                   style: TextStyle(
-                    fontSize: 16, // Increased from 14
+                    fontSize: 14,
                     color: Colors.grey.shade600,
                   ),
                 ),
@@ -1196,7 +1163,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue.shade100,
                 foregroundColor: Colors.blue.shade700,
-                padding: const EdgeInsets.symmetric(vertical: 10), // Increased from 8
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -1205,7 +1172,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               child: const Text(
                 'View All',
                 style: TextStyle(
-                  fontSize: 15, // Increased from 13
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -1225,13 +1192,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
-        icon: Icon(icon, size: 18), // Increased from 16
-        label: Text(label, style: const TextStyle(fontSize: 15)), // Increased from 13
+        icon: Icon(icon, size: 16),
+        label: Text(label, style: const TextStyle(fontSize: 13)),
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: color.shade50,
           foregroundColor: color.shade700,
-          padding: const EdgeInsets.symmetric(vertical: 10), // Increased from 8
+          padding: const EdgeInsets.symmetric(vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(color: color.shade200),
@@ -1244,7 +1211,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   
   Widget _buildCompactWeightLimitsCard() {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -1264,38 +1231,38 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Icon(
                 Icons.tune,
                 color: Colors.blue.shade700,
-                size: 20, // Increased from 16
+                size: 16,
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Weight Limits',
                 style: TextStyle(
-                  fontSize: 16, // Increased from 14
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16), // Increased from 12
+          const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
                   Container(
-                    width: 12, // Increased from 10
-                    height: 12, // Increased from 10
+                    width: 10,
+                    height: 10,
                     decoration: BoxDecoration(
                       color: Colors.amber.shade400,
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: 6), // Increased from 4
+                  const SizedBox(width: 4),
                   Text(
                     'Min:',
                     style: TextStyle(
-                      fontSize: 15, // Increased from 13
+                      fontSize: 13,
                       color: Colors.grey.shade600,
                     ),
                   ),
@@ -1304,19 +1271,19 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Text(
                 '${_minWeightLimit.toStringAsFixed(1)} tons',
                 style: TextStyle(
-                  fontSize: 15, // Increased from 13
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                   color: Colors.amber.shade700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6), // Increased from 4
+          const SizedBox(height: 4),
           SliderTheme(
             data: SliderThemeData(
-              trackHeight: 6, // Increased from 4
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8), // Increased from 6
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16), // Increased from 12
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
             ),
             child: Slider(
               value: _minWeightLimit,
@@ -1333,25 +1300,25 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               },
             ),
           ),
-          const SizedBox(height: 12), // Increased from 8
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
                   Container(
-                    width: 12, // Increased from 10
-                    height: 12, // Increased from 10
+                    width: 10,
+                    height: 10,
                     decoration: BoxDecoration(
                       color: Colors.red.shade400,
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const SizedBox(width: 6), // Increased from 4
+                  const SizedBox(width: 4),
                   Text(
                     'Max:',
                     style: TextStyle(
-                      fontSize: 15, // Increased from 13
+                      fontSize: 13,
                       color: Colors.grey.shade600,
                     ),
                   ),
@@ -1360,19 +1327,19 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Text(
                 '${_maxWeightLimit.toStringAsFixed(1)} tons',
                 style: TextStyle(
-                  fontSize: 15, // Increased from 13
+                  fontSize: 13,
                   fontWeight: FontWeight.bold,
                   color: Colors.red.shade700,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 6), // Increased from 4
+          const SizedBox(height: 4),
           SliderTheme(
             data: SliderThemeData(
-              trackHeight: 6, // Increased from 4
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8), // Increased from 6
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 16), // Increased from 12
+              trackHeight: 4,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
             ),
             child: Slider(
               value: _maxWeightLimit,
@@ -1414,7 +1381,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             },
           ),
         ),
-        const SizedBox(width: 10), // Increased from 8
+        const SizedBox(width: 8),
         Expanded(
           child: _buildActionChip(
             icon: Icons.report_problem,
@@ -1443,7 +1410,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             },
           ),
         ),
-        const SizedBox(width: 10), // Increased from 8
+        const SizedBox(width: 8),
         Expanded(
           child: _buildActionChip(
             icon: Icons.history,
@@ -1478,20 +1445,20 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           onTap: onPressed,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14), // Increased from 8, 12
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   icon,
-                  size: 18, // Increased from 16
+                  size: 16,
                   color: color.shade700,
                 ),
-                const SizedBox(width: 8), // Increased from 6
+                const SizedBox(width: 6),
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 16, // Increased from 14
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                     color: color.shade700,
                   ),
@@ -1506,7 +1473,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
   
   Widget _buildWeightHistoryCard() {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -1529,13 +1496,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                   Icon(
                     Icons.show_chart,
                     color: Colors.blue.shade700,
-                    size: 20, // Increased from 16
+                    size: 16,
                   ),
-                  const SizedBox(width: 8), // Increased from 6
+                  const SizedBox(width: 6),
                   Text(
                     'Weight History',
                     style: TextStyle(
-                      fontSize: 16, // Increased from 14
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
                       color: Colors.grey.shade700,
                     ),
@@ -1545,18 +1512,18 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               TextButton.icon(
                 icon: Icon(
                   Icons.calendar_today,
-                  size: 16, // Increased from 14
+                  size: 14,
                   color: Colors.blue.shade700,
                 ),
                 label: Text(
                   'Last 24 hours',
                   style: TextStyle(
                     color: Colors.blue.shade700,
-                    fontSize: 14, // Increased from 12
+                    fontSize: 12,
                   ),
                 ),
                 style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6), // Increased from 8, 4
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   minimumSize: Size.zero,
                 ),
                 onPressed: () {
@@ -1565,9 +1532,9 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               ),
             ],
           ),
-          const SizedBox(height: 16), // Increased from 12
+          const SizedBox(height: 12),
           SizedBox(
-            height: 200, // Increased from 180
+            height: 180,
             child: LineChart(
               LineChartData(
                 gridData: FlGridData(
@@ -1599,7 +1566,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      reservedSize: 28, // Increased from 24
+                      reservedSize: 24,
                       interval: 1,
                       getTitlesWidget: (value, meta) {
                         String text = '';
@@ -1628,7 +1595,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                           text,
                           style: TextStyle(
                             color: Colors.grey.shade600,
-                            fontSize: 11, // Increased from 9
+                            fontSize: 9,
                           ),
                         );
                       },
@@ -1643,11 +1610,11 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                           '${value.toInt()}',
                           style: TextStyle(
                             color: Colors.grey.shade600,
-                            fontSize: 11, // Increased from 9
+                            fontSize: 9,
                           ),
                         );
                       },
-                      reservedSize: 36, // Increased from 30
+                      reservedSize: 30,
                     ),
                   ),
                 ),
@@ -1669,13 +1636,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                         Colors.blue.shade700,
                       ],
                     ),
-                    barWidth: 4, // Increased from 3
+                    barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: FlDotData(
                       show: true,
                       getDotPainter: (spot, percent, barData, index) {
                         return FlDotCirclePainter(
-                          radius: 4, // Increased from 3
+                          radius: 3,
                           color: Colors.white,
                           strokeWidth: 2,
                           strokeColor: Colors.blue.shade700,
@@ -1702,7 +1669,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                     ],
                     isCurved: false,
                     color: Colors.red.shade300,
-                    barWidth: 1.5, // Increased from 1
+                    barWidth: 1,
                     isStrokeCapRound: true,
                     dotData: FlDotData(show: false),
                     dashArray: [5, 5],
@@ -1714,7 +1681,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
                     ],
                     isCurved: false,
                     color: Colors.amber.shade300,
-                    barWidth: 1.5, // Increased from 1
+                    barWidth: 1,
                     isStrokeCapRound: true,
                     dotData: FlDotData(show: false),
                     dashArray: [5, 5],
@@ -1723,55 +1690,55 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               ),
             ),
           ),
-          const SizedBox(height: 12), // Increased from 8
+          const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 10, // Increased from 8
-                height: 10, // Increased from 8
+                width: 8,
+                height: 8,
                 decoration: BoxDecoration(
                   color: Colors.blue.shade500,
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Weight',
                 style: TextStyle(
-                  fontSize: 12, // Increased from 10
+                  fontSize: 10,
                   color: Colors.grey.shade600,
                 ),
               ),
-              const SizedBox(width: 16), // Increased from 12
+              const SizedBox(width: 12),
               Container(
-                width: 10, // Increased from 8
-                height: 2.5, // Increased from 2
+                width: 8,
+                height: 2,
                 decoration: BoxDecoration(
                   color: Colors.red.shade300,
                 ),
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Max',
                 style: TextStyle(
-                  fontSize: 12, // Increased from 10
+                  fontSize: 10,
                   color: Colors.grey.shade600,
                 ),
               ),
-              const SizedBox(width: 16), // Increased from 12
+              const SizedBox(width: 12),
               Container(
-                width: 10, // Increased from 8
-                height: 2.5, // Increased from 2
+                width: 8,
+                height: 2,
                 decoration: BoxDecoration(
                   color: Colors.amber.shade300,
                 ),
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 'Min',
                 style: TextStyle(
-                  fontSize: 12, // Increased from 10
+                  fontSize: 10,
                   color: Colors.grey.shade600,
                 ),
               ),
@@ -1790,7 +1757,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     String subtitle,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16), // Increased from 12
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -1810,13 +1777,13 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               Icon(
                 icon,
                 color: color.shade700,
-                size: 20, // Increased from 16
+                size: 16,
               ),
-              const SizedBox(width: 6), // Increased from 4
+              const SizedBox(width: 4),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16, // Increased from 14
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade700,
                 ),
@@ -1828,7 +1795,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
             child: Text(
               value,
               style: TextStyle(
-                fontSize: 30, // Increased from 26
+                fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: color.shade700,
               ),
@@ -1837,7 +1804,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
           const Spacer(),
           Center(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5), // Increased from 8, 4
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: color.shade50,
                 borderRadius: BorderRadius.circular(12),
@@ -1845,7 +1812,7 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
               child: Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 14, // Increased from 12
+                  fontSize: 12,
                   color: color.shade700,
                 ),
               ),
@@ -1898,4 +1865,3 @@ class _DashboardPageState extends State<DashboardPage> with SingleTickerProvider
     );
   }
 }
-
