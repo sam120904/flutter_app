@@ -10,6 +10,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform, // Use the generated config
+    name: 'flutter-App',
   );
   runApp(const MyApp());
 }
